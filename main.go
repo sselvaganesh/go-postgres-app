@@ -35,12 +35,13 @@ func main() {
 
 	// Create server
 	svr := &http.Server {
-		Addr: "localhost:8080",
+		Addr: "0.0.0.0:8080",
 		}
 				
 	log.Println("Server is listening in port 8080: ", svr)				
 							
 	http.Handle("/read", p)	
-	svr.ListenAndServe()
-		
+	if err := svr.ListenAndServe()	; err != nil {
+		log.Fatal("ListenAndServer: ", err)
+	}
 }

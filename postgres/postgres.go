@@ -5,6 +5,7 @@ import (
 	"log"
 	"context"
 	"time"
+	"os"
 	"database/sql"
 	"net/http"
 	"github.com/docker-app/postgres-app/postgres/ty"
@@ -16,7 +17,7 @@ func GetInitCfg() t.PgCfg {
 		
 	cfg := t.PgCfg {
 		SslModule: 	pgconf.SslModule,
-		HostAddr:	pgconf.HostAddr,
+		HostAddr:	pgconf.HostAddrLocal,
 		Port:		pgconf.Port,
 		User:		pgconf.User,
 		Passwd:		pgconf.Passwd,
@@ -42,8 +43,17 @@ func checkPgConnectionPeriodically(ctx context.Context, pgConn *sql.Conn) {
 
 func getRemoteHost() string {
 
+	var pgHostAddr string
+
+	if os.Getenv("RUN_LOCAL") == "TRUE" {
+		pgHostAddr = pgconf.HostAddrLocal
+	} else {
+		pgHostAddr = pgconf.HostAddrDocker
+	}
+
+	log.Println("PgHostAddr: ", pgHostAddr)
 	//postgres://postgres:password@localhost/DB_1?sslmode=disable
-	remoteHost := fmt.Sprintf("%v://%v:%v@%v:%v/%v?sslmode=%v", pgconf.Schema, pgconf.User, pgconf.Passwd, pgconf.HostAddr, pgconf.Port, pgconf.DbName, pgconf.SslModule)
+	remoteHost := fmt.Sprintf("%v://%v:%v@%v:%v/%v?sslmode=%v", pgconf.Schema, pgconf.User, pgconf.Passwd, pgHostAddr, pgconf.Port, pgconf.DbName, pgconf.SslModule)
 	log.Printf("Remote Host: [%v]\n", remoteHost)
 	
 	return remoteHost
