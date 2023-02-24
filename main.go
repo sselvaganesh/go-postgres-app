@@ -17,10 +17,10 @@ type postgres struct {
 
 func(p *postgres) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	log.Print("Reaching this line.?")
+	log.Println("Serving HTTP request ==> ", r.URL)
 	result := pg.Handler(p.ctx, w, r, "READ", p.pgConn )
 	io.WriteString(w, result)
-	
+	log.Println("Request is successfully served.")
 }
 
 func main() {
